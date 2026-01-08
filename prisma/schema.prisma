@@ -1,0 +1,56 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  password      String
+  name          String?
+  company       String?
+  credits       Int       @default(50)
+  plan          String    @default("starter")
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  usageHistory  Usage[]
+  subscriptions Subscription[]
+}
+
+model Usage {
+  id        String   @id @default(cuid())
+  userId    String
+  agentId   String
+  agentName String
+  credits   Int      @default(1)
+  input     String?
+  output    String?
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Subscription {
+  id        String   @id @default(cuid())
+  userId    String
+  plan      String
+  status    String   @default("active")
+  startDate DateTime @default(now())
+  endDate   DateTime?
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Agent {
+  id          String   @id @default(cuid())
+  name        String
+  slug        String   @unique
+  description String
+  icon        String
+  category    String
+  prompt      String
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+}
