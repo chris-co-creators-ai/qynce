@@ -2,8 +2,23 @@ import { NextAuthOptions } from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
 import bcrypt from 'bcryptjs'
 
+const useSecureCookies = process.env.NEXTAUTH_URL?.startsWith('https://') ?? false
+const cookieDomain = process.env.NEXTAUTH_URL?.includes('qynce.nl') ? '.qynce.nl' : undefined
+
 export const authOptions: NextAuthOptions = {
   secret: process.env.NEXTAUTH_SECRET,
+  cookies: {
+    sessionToken: {
+      name: useSecureCookies ? '__Secure-next-auth.session-token' : 'next-auth.session-token',
+      options: {
+        httpOnly: true,
+        sameSite: 'lax',
+        path: '/',
+        secure: useSecureCookies,
+        domain: cookieDomain,
+      },
+    },
+  },
   providers: [
     CredentialsProvider({
       name: 'credentials',
